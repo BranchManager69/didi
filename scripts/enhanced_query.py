@@ -111,13 +111,13 @@ def setup_llm():
     }
     
     # Create LLM instance with system prompt focused on code understanding
+    # Note: We don't need to pass cache_dir - HF_HOME env var handles this
     llm = HuggingFaceLLM(
         model_name=DEFAULT_MODEL_PATH,
         tokenizer_name=DEFAULT_MODEL_PATH,
         context_window=4096,  # Adjust based on model
         model_kwargs=model_kwargs,
         generate_kwargs=generate_kwargs,
-        cache_dir=str(MODEL_CACHE_DIR),  # Use cached models
         system_prompt=textwrap.dedent("""
             You are Didi, the friendly and knowledgeable AI assistant for DegenDuel.
             You specialize in the DegenDuel codebase, which is a TypeScript and React-based web application for a crypto trading game platform.
@@ -164,11 +164,11 @@ def load_index():
         sys.exit(1)
     
     # Set up embedding model with caching
+    # Note: HF_HOME env var handles caching; we don't need to pass cache_folder
     Settings.embed_model = HuggingFaceEmbedding(
         model_name=DEFAULT_EMBED_MODEL,
         max_length=512,
-        trust_remote_code=True,
-        cache_folder=str(MODEL_CACHE_DIR),  # Use cached models
+        trust_remote_code=True
     )
     
     # Create vector store and index
