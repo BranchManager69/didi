@@ -25,8 +25,31 @@ COLLECTION_NAME = os.environ.get("CODE_RAG_COLLECTION_NAME", "degenduel_code")
 # Default model path for Didi's brain
 DEFAULT_MODEL_PATH = os.environ.get("CODE_RAG_MODEL_PATH", "codellama/CodeLlama-7b-instruct-hf")
 
-# Default embedding model
+# Embedding models - multiple models for A/B testing
+# Default embedding model can be overridden with CODE_RAG_EMBED_MODEL environment variable
 DEFAULT_EMBED_MODEL = os.environ.get("CODE_RAG_EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
+
+# Available embedding models for testing
+EMBEDDING_MODELS = {
+    # Original model - general purpose
+    "general": "sentence-transformers/all-MiniLM-L6-v2",
+    
+    # Code-specific model - better for code understanding
+    "code": "flax-sentence-embeddings/st-codesearch-distilroberta-base",
+    
+    # Larger, more powerful general model
+    "mpnet": "sentence-transformers/all-mpnet-base-v2"
+}
+
+# A/B testing configuration
+# Set to True to enable A/B testing of embedding models
+ENABLE_AB_TESTING = os.environ.get("CODE_RAG_AB_TESTING", "False").lower() == "true"
+
+# If A/B testing is enabled, use this as the second model
+AB_TEST_MODEL = os.environ.get("CODE_RAG_AB_TEST_MODEL", EMBEDDING_MODELS["code"])
+
+# A/B testing metrics collection directory
+METRICS_DIR = BASE_DIR / "metrics"
 
 # Directories to ignore during indexing
 IGNORE_DIRS = [
