@@ -94,10 +94,10 @@ def setup_llm():
     
     logger.info(f"Loading Didi's brain: {DEFAULT_MODEL_PATH}")
     
-    # Setup model kwargs for device mapping
+    # Setup model kwargs for GPU optimization
     # Optimize for Lambda Labs GPU instances
+    # Don't include device_map here - it will be passed automatically
     model_kwargs = {
-        "device_map": "auto",
         "load_in_8bit": True,  # More efficient memory usage
     }
     

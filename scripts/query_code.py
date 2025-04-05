@@ -111,9 +111,10 @@ def setup_llm():
     
     logger.info(f"Loading Didi's brain: {DEFAULT_MODEL_PATH}")
     
-    # Setup model kwargs for device mapping
+    # Setup model kwargs for optimal GPU usage
+    # Don't include device_map here - it will be passed automatically
     model_kwargs = {
-        "device_map": "auto",
+        "torch_dtype": "auto",  # Use the best precision for the device
     }
     
     # Configure generation parameters
@@ -126,6 +127,7 @@ def setup_llm():
     }
     
     # Create LLM instance with simpler configuration for compatibility
+    # Don't pass device_map directly to avoid conflict with model_kwargs
     llm = HuggingFaceLLM(
         model_name=DEFAULT_MODEL_PATH,
         tokenizer_name=DEFAULT_MODEL_PATH,
