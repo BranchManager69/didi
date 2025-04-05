@@ -108,6 +108,7 @@ def setup_llm():
     """Set up the language model for Didi."""
     # Import modules here to avoid import errors during dependency check
     from llama_index.llms.huggingface import HuggingFaceLLM
+    from llama_index.core import Settings
     
     logger.info(f"Loading Didi's brain: {DEFAULT_MODEL_PATH}")
     
@@ -148,6 +149,11 @@ def setup_llm():
             Remember that your purpose is to help DegenDuel developers understand and navigate their codebase!
         """).strip(),
     )
+    
+    # Configure global settings to use our HuggingFace LLM instead of OpenAI
+    # This prevents fallback to OpenAI in various llama-index components
+    Settings.llm = llm
+    logger.info("Configured global Settings to use HuggingFace LLM")
     
     return llm
 
@@ -276,7 +282,7 @@ def main():
         # Load the index
         index = load_index()
         
-        # Set up the LLM
+        # Set up the LLM (also configures global Settings)
         llm = setup_llm()
         
         # Setup retriever
