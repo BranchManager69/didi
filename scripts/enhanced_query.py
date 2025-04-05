@@ -95,10 +95,11 @@ def setup_llm():
     logger.info(f"Loading Didi's brain: {DEFAULT_MODEL_PATH}")
     
     # Setup model kwargs for GPU optimization
-    # Optimize for Lambda Labs GPU instances
+    # With GH200 (96GB GPU RAM), we can use full precision for best quality
     # Don't include device_map here - it will be passed automatically
     model_kwargs = {
-        "load_in_8bit": True,  # More efficient memory usage
+        # No quantization needed - we have plenty of GPU memory
+        "torch_dtype": "auto",  # Use best precision for the device
     }
     
     # Configure generation parameters
