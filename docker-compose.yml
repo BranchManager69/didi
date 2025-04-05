@@ -1,0 +1,17 @@
+version: '3'
+services:
+  didi:
+    build: .
+    volumes:
+      - /home/ubuntu/degenduel-gpu/models:/app/models
+      - /home/ubuntu/degenduel-gpu/data:/app/data
+      - /home/ubuntu/degenduel-gpu/config:/app/config
+      - /home/ubuntu/degenduel-gpu/repos:/app/repos
+      - ./:/app/didi
+    environment:
+      - HF_HOME=/app/models
+      - TORCH_HOME=/app/models
+      - CODE_RAG_DB_PATH=/app/data/chroma_db
+      - CODE_RAG_REPOS_PATH=/app/repos
+    ports:
+      - "8000:8000"

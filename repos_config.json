@@ -1,0 +1,65 @@
+{
+  "degenduel": {
+    "name": "DegenDuel Frontend",
+    "description": "React-based frontend for the DegenDuel crypto trading game platform",
+    "path": "/home/ubuntu/didi/repos/degenduel",
+    "git_url": "",
+    "enabled": true
+  }
+,
+    "degenduel_backend": {
+        "name": "DegenDuel Backend",
+        "description": "Backend services for the DegenDuel crypto trading game platform",
+        "path": "/home/ubuntu/didi/repos/degenduel_backend",
+        "git_url": "https://github.com/BranchManager69/degenduel",
+        "enabled": true
+    }
+,
+    "pumpfun_bundler": {
+        "name": "PumpFun Bundler",
+        "description": "Solana bundle tool set that can PumpSwap bundle, Raydium bundle with Nozomi API",
+        "path": "/home/ubuntu/didi/repos/pumpfun_bundler",
+        "git_url": "https://github.com/L9T-Development/Pumpfun-bundler",
+        "enabled": true
+    }
+,
+    "ddnft": {
+        "name": "ddnft",
+        "description": "DegenDuel NFT repository",
+        "path": "/home/ubuntu/didi/repos/ddnft",
+        "git_url": "https://github.com/BranchManager69/ddnft",
+        "enabled": true
+    }
+,
+    "eliza": {
+        "name": "eliza",
+        "description": "Autonomous agents for everyone. Highly-extensible and blockchain-ready agent framework",
+        "path": "/home/ubuntu/didi/repos/eliza",
+        "git_url": "https://github.com/elizaOS/eliza",
+        "enabled": true
+    }
+,
+    "solana-agent-kit": {
+        "name": "solana-agent-kit",
+        "description": "Connect any AI agents to Solana protocols",
+        "path": "/home/ubuntu/didi/repos/solana-agent-kit",
+        "git_url": "https://github.com/sendaifun/solana-agent-kit",
+        "enabled": true
+    }
+,
+    "ddcomment": {
+        "name": "ddcomment",
+        "description": "DegenDuel's automated comment system for promotion during launch",
+        "path": "/home/ubuntu/didi/repos/ddcomment",
+        "git_url": "https://github.com/BranchManager69/ddcomment",
+        "enabled": true
+    }
+,
+    "didi": {
+        "name": "didi",
+        "description": "DegenDuel's GH200-powered AI assistant",
+        "path": "/home/ubuntu/didi/repos/didi",
+        "git_url": "https://github.com/BranchManager69/didi",
+        "enabled": true
+    }
+}
