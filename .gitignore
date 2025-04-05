@@ -13,6 +13,13 @@ chroma_db/
 repos/
 didi.sh.bak
 
+# Sensitive data
+private/
+.env
+.secret
+secrets/
+credentials/
+
 # Downloaded models
 models/
 
