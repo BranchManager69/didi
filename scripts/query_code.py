@@ -215,11 +215,15 @@ def setup_query_engine(retriever, llm):
     from llama_index.core.postprocessor import SimilarityPostprocessor
     
     # Use a response synthesizer that can handle code well
-    response_synthesizer = get_response_synthesizer(
-        response_mode="refine",  # Use refine for better coherence
+    # Explicitly use TreeSummarize to avoid OpenAI dependency
+    from llama_index.core.response_synthesizers import TreeSummarize
+    
+    # Create response synthesizer with explicit mode to avoid OpenAI
+    response_synthesizer = TreeSummarize(
         llm=llm,
         verbose=True,
     )
+    logger.info("Using TreeSummarize response synthesizer")
     
     # Set up the query engine
     query_engine = RetrieverQueryEngine.from_args(
