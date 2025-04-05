@@ -92,8 +92,8 @@ INCLUDE_EXTS = [
 ]
 
 # Repositories configuration
-# Use persistent storage for repos config
-REPOS_CONFIG_FILE = Path(os.environ.get("CODE_RAG_CONFIG_PATH", "/home/ubuntu/degenduel-gpu/config/repos_config.json"))
+# Use local repos_config.json file
+REPOS_CONFIG_FILE = Path(os.environ.get("CODE_RAG_CONFIG_PATH", os.path.join(str(BASE_DIR), "repos_config.json")))
 
 # Default repositories if no config file exists
 DEFAULT_REPOS = {

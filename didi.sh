@@ -12,7 +12,7 @@ cd "$SCRIPT_DIR"
 export CODE_RAG_PATH="$SCRIPT_DIR"
 export CODE_RAG_REPOS_PATH="/home/ubuntu/degenduel-gpu/repos"
 export CODE_RAG_DB_PATH="/home/ubuntu/degenduel-gpu/data/chroma_db"
-export CODE_RAG_CONFIG_PATH="/home/ubuntu/degenduel-gpu/config/repos_config.json"
+export CODE_RAG_CONFIG_PATH="$SCRIPT_DIR/repos_config.json"
 export HF_HOME="/home/ubuntu/degenduel-gpu/models"
 export TORCH_HOME="/home/ubuntu/degenduel-gpu/models"
 
