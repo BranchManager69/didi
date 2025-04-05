@@ -316,7 +316,23 @@ function update_repo() {
                     echo -e "${GREEN}  ✓ Already up to date${NC}"
                 fi
             else
-                echo -e "${RED}  ✗ Repository at ${REPO_PATH} is not a git repository or doesn't exist${NC}"
+                # Get repo info from config to clone it if there's a git URL
+                REPO_NAME=$(basename "$REPO_PATH")
+                REPO_URL=$(cat "$CODE_RAG_CONFIG_PATH" | grep -A10 "\"path\": \"$REPO_PATH\"" | grep -o '"git_url": "[^"]*"' | head -n 1 | cut -d'"' -f4)
+                
+                if [ -n "$REPO_URL" ]; then
+                    echo -e "${YELLOW}  ⟳ Repository not found. Cloning from $REPO_URL...${NC}"
+                    mkdir -p "$(dirname "$REPO_PATH")"
+                    git clone "$REPO_URL" "$REPO_PATH"
+                    if [ $? -eq 0 ]; then
+                        echo -e "${GREEN}  ✓ Repository cloned successfully${NC}"
+                        REPO_UPDATED=true
+                    else
+                        echo -e "${RED}  ✗ Failed to clone repository${NC}"
+                    fi
+                else
+                    echo -e "${RED}  ✗ Repository at ${REPO_PATH} is not a git repository or doesn't exist, and no git URL provided${NC}"
+                fi
             fi
         done
     else
