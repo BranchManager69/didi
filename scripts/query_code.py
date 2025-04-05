@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Code Repository Query Script for DegenDuel
-Enables semantic search and question answering over the codebase.
+Didi's Brain: DegenDuel's AI Assistant
+Enables semantic search and question answering over the DegenDuel codebase.
 """
 
 import os
@@ -38,8 +38,8 @@ TEMPERATURE = 0.1
 TOP_K = 10  # Number of relevant chunks to retrieve
 
 def setup_llm():
-    """Set up the language model for querying."""
-    logger.info(f"Loading LLM: {DEFAULT_MODEL_PATH}")
+    """Set up the language model for Didi."""
+    logger.info(f"Loading Didi's brain: {DEFAULT_MODEL_PATH}")
     
     # Setup model kwargs for device mapping
     model_kwargs = {
@@ -63,23 +63,29 @@ def setup_llm():
         model_kwargs=model_kwargs,
         generate_kwargs=generate_kwargs,
         system_prompt=textwrap.dedent("""
-            You are an expert TypeScript and React developer working on the DegenDuel project.
-            Analyze the code snippets carefully and provide detailed, accurate information.
-            If you're asked about implementation details, focus on the specific code patterns and architecture.
-            If you're unsure about something, mention that rather than speculating.
-            Provide code examples when relevant to illustrate your points.
+            You are Didi, the friendly and knowledgeable AI assistant for DegenDuel.
+            You specialize in the DegenDuel codebase, which is a TypeScript and React-based web application.
+            
+            When answering questions:
+            - Be concise, friendly, and helpful
+            - Use emojis occasionally to add personality 
+            - If you're unsure about something, be honest rather than speculating
+            - Reference specific code files when explaining implementation details
+            - Provide code examples when relevant to illustrate your points
+            
+            Remember that your purpose is to help DegenDuel developers understand and navigate their codebase!
         """).strip(),
     )
     
     return llm
 
 def load_index():
-    """Load the existing index from ChromaDB."""
-    logger.info(f"Loading index from {DB_DIR}")
+    """Load Didi's knowledge base from ChromaDB."""
+    logger.info(f"Loading Didi's knowledge base from {DB_DIR}")
     
     # Check if database exists
     if not DB_DIR.exists():
-        logger.error(f"Database directory {DB_DIR} does not exist! Run the indexing script first.")
+        logger.error(f"Knowledge base directory {DB_DIR} does not exist! Run './didi.sh index' first.")
         sys.exit(1)
     
     # Initialize ChromaDB
@@ -88,7 +94,7 @@ def load_index():
     try:
         collection = client.get_collection(name=COLLECTION_NAME)
     except ValueError:
-        logger.error(f"Collection '{COLLECTION_NAME}' not found! Run the indexing script first.")
+        logger.error(f"Collection '{COLLECTION_NAME}' not found! Run './didi.sh index' first.")
         sys.exit(1)
     
     # Set up embedding model
@@ -119,7 +125,7 @@ def setup_retriever(index):
     return retriever
 
 def setup_query_engine(retriever, llm):
-    """Set up the query engine with advanced features."""
+    """Set up Didi's query engine with advanced features."""
     # Use a response synthesizer that can handle code well
     response_synthesizer = get_response_synthesizer(
         response_mode="refine",  # Use refine for better coherence
@@ -142,7 +148,7 @@ def setup_query_engine(retriever, llm):
 def print_source_info(response):
     """Print information about the source documents used in the response."""
     print("\n" + "=" * 40)
-    print("SOURCE DOCUMENTS:")
+    print("DIDI'S SOURCES:")
     print("=" * 40)
     
     if not hasattr(response, 'source_nodes') or not response.source_nodes:
@@ -162,12 +168,12 @@ def print_source_info(response):
 def main():
     """Main execution function."""
     if len(sys.argv) < 2:
-        print("Usage: python query_code.py 'your question about the codebase'")
+        print("Usage: python query_code.py 'your question about the DegenDuel codebase'")
         sys.exit(1)
     
     # Get query from command line arguments
     query = " ".join(sys.argv[1:])
-    logger.info(f"Query: {query}")
+    logger.info(f"Question for Didi: {query}")
     
     # Load the index
     index = load_index()
@@ -182,12 +188,12 @@ def main():
     query_engine = setup_query_engine(retriever, llm)
     
     # Execute query
-    print("\nQuerying the codebase, please wait...\n")
+    print("\nDidi is thinking about your question, please wait... 🤔\n")
     response = query_engine.query(query)
     
     # Print response
     print("\n" + "=" * 40)
-    print("RESPONSE:")
+    print("DIDI'S ANSWER:")
     print("=" * 40)
     print(response)
     

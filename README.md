@@ -1,16 +1,16 @@
-# CodeRAG: Code Repository Analysis with LLMs
+# Didi: DegenDuel's AI Assistant
 
-A powerful Retrieval-Augmented Generation (RAG) system for semantic code search and understanding.
+A powerful AI assistant that helps you navigate and understand the DegenDuel codebase.
 
-![CodeRAG Demo](https://i.ibb.co/f2smYQH/coderag-diagram.png)
+![Didi Demo](https://i.ibb.co/f2smYQH/coderag-diagram.png)
 
 ## 📋 Overview
 
-CodeRAG transforms your code repository into a searchable knowledge base, enabling:
+Didi transforms the DegenDuel codebase into a searchable knowledge base, enabling:
 
 - 🔍 **Semantic Code Search**: Find relevant code based on meaning, not just keywords
 - 📝 **Detailed Code Exploration**: Get full context and implementation details
-- 🤖 **LLM-Powered Insights**: (optional) Ask complex questions about your codebase
+- 🤖 **AI-Powered Insights**: Ask Didi complex questions about the DegenDuel codebase
 - 🚀 **Simple Command Interface**: Easy-to-use shell commands for all functionality
 
 ## 🛠️ Installation
@@ -19,14 +19,14 @@ CodeRAG transforms your code repository into a searchable knowledge base, enabli
 
 - Python 3.10+
 - Git
-- A code repository to analyze
+- DegenDuel repository
 
 ### Setup
 
 ```bash
 # Clone this repository
-git clone https://github.com/yourusername/coderag.git
-cd coderag
+git clone https://github.com/degenduel/didi.git
+cd didi
 
 # Create virtual environment
 python -m venv venv
@@ -35,45 +35,45 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
-# Clone a repository to analyze
-git clone https://github.com/your/target-repo.git repo
+# Clone the DegenDuel repository if needed
+git clone https://github.com/degenduel/degenduel-fe.git repo
 
-# Build the index
-./coderag.sh index
+# Build Didi's knowledge base
+./didi.sh index
 ```
 
 ## 🚀 Usage
 
-CodeRAG provides a simple command-line interface for all functionality:
+Didi provides a simple command-line interface for all functionality:
 
 ```bash
 # Show available commands
-./coderag.sh help
+./didi.sh help
 
-# Check system status
-./coderag.sh status
+# Check Didi's status
+./didi.sh status
 
 # Search code
-./coderag.sh search "websocket authentication"
+./didi.sh search "websocket authentication"
 
 # Detailed code view
-./coderag.sh details "contest system implementation"
+./didi.sh details "contest system implementation"
 
-# Ask questions about the code (requires LLM)
-./coderag.sh ask "How does the user authentication work?"
+# Ask Didi questions about the code
+./didi.sh ask "How does the user authentication work?"
 
-# Update repository and rebuild index
-./coderag.sh update
+# Update repository and rebuild knowledge base
+./didi.sh update
 ```
 
 ## 🔧 Configuration
 
-CodeRAG can be configured via environment variables or by editing `config.py`:
+Didi can be configured via environment variables or by editing `config.py`:
 
 ```bash
 # Set custom paths via environment variables
-export CODE_RAG_PATH="/path/to/coderag"
-export CODE_RAG_REPO_PATH="/path/to/repo"
+export CODE_RAG_PATH="/path/to/didi"
+export CODE_RAG_REPO_PATH="/path/to/degenduel-repo"
 export CODE_RAG_DB_PATH="/path/to/database"
 
 # Set custom model paths
@@ -85,43 +85,43 @@ export CODE_RAG_EMBED_MODEL="sentence-transformers/all-MiniLM-L6-v2"
 
 **Finding implementation details:**
 ```bash
-./coderag.sh search "user authentication flow"
+./didi.sh search "user authentication flow"
 ```
 
 **Getting detailed code snippets:**
 ```bash
-./coderag.sh details "websocket system architecture" -n 3
+./didi.sh details "websocket system architecture" -n 3
 ```
 
 **Understanding complex patterns:**
 ```bash
-./coderag.sh ask "Explain how the contest system is implemented"
+./didi.sh ask "Explain how the contest system is implemented"
 ```
 
 ## 🏆 Features
 
 - **Fast Semantic Search**: Find code based on concepts, not just literal text
 - **Context-Aware Results**: Results include relevant surrounding code
-- **Lightweight Embedding**: Works without needing a full LLM for basic search
+- **DegenDuel-Specific Knowledge**: Tailored specifically for the DegenDuel codebase
 - **Configurable Paths**: Works with any repository location
 - **Optimized for Code**: Special handling for code files and structure
-- **Expandable**: Add your own search patterns or customize the LLM
+- **Expandable**: Didi can learn from codebase updates automatically
 
 ## 🛣️ Roadmap
 
-- [ ] UI interface for easier browsing
+- [ ] UI interface for easier interaction with Didi
 - [ ] Integration with development environments
-- [ ] Support for more programming languages
+- [ ] Support for additional DegenDuel repositories
 - [ ] Enhanced visualization of code relationships
 - [ ] Function-level understanding and summarization
 
-## 📚 How It Works
+## 📚 How Didi Works
 
 1. **Indexing**: Code files are processed, chunked, and embedded into vectors
-2. **Storage**: Vectors are stored in a ChromaDB database for fast retrieval
+2. **Storage**: Vectors are stored in a database for fast retrieval
 3. **Search**: User queries are converted to vectors and matched against the database
 4. **Retrieval**: Most relevant code is retrieved based on vector similarity
-5. **Analysis**: (optional) LLM provides insights based on retrieved code
+5. **Analysis**: Didi provides insights based on retrieved code
 
 ## 📄 License
 
@@ -131,4 +131,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 - LlamaIndex for the RAG framework
 - Sentence-Transformers for embeddings
-- DegenDuel for the example repository 
+- DegenDuel team for creating an awesome platform 

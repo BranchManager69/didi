@@ -1,5 +1,5 @@
 #!/bin/bash
-# CodeRAG - Easy interface for code repository analysis
+# Didi - DegenDuel's AI Assistant
 # ----------------------------------------------------
 
 set -e
@@ -26,51 +26,53 @@ NC='\033[0m' # No Color
 # Print header
 function print_header() {
     echo -e "\n${BLUE}==============================================${NC}"
-    echo -e "${BLUE}           DegenDuel Code RAG System           ${NC}"
+    echo -e "${BLUE}           Didi - DegenDuel's AI Assistant      ${NC}"
     echo -e "${BLUE}==============================================${NC}\n"
 }
 
 # Print usage information
 function usage() {
     print_header
-    echo -e "Usage: ./coderag.sh [command] [arguments]"
+    echo -e "Usage: ./didi.sh [command] [arguments]"
     echo -e "\nCommands:"
-    echo -e "  ${GREEN}index${NC}               Build the vector index of the repository"
-    echo -e "  ${GREEN}search${NC} [query]      Semantic search for code (fast)"
-    echo -e "  ${GREEN}details${NC} [query]     Get detailed code snippets for your query"
-    echo -e "  ${GREEN}ask${NC} [question]      Ask questions about the codebase (uses LLM)"
-    echo -e "  ${GREEN}update${NC}              Update the repository and rebuild index"
-    echo -e "  ${GREEN}status${NC}              Check the status of the RAG system"
+    echo -e "  ${GREEN}get${NC} [query]         Find code matches (quick search)"
+    echo -e "  ${GREEN}see${NC} [query]         Alias for get"
+    echo -e "  ${GREEN}g${NC} [query]           Short alias for get"
+    echo -e "  ${GREEN}details${NC} [query]     Get detailed code snippets"
+    echo -e "  ${GREEN}d${NC} [query]           Short alias for details"
+    echo -e "  ${GREEN}ask${NC} [question]      Ask Didi questions about the code"
+    echo -e "  ${GREEN}a${NC} [question]        Short alias for ask"
+    echo -e "  ${GREEN}update${NC}              Update repo and rebuild knowledge"
+    echo -e "  ${GREEN}status${NC}              Check Didi's system status"
     echo -e "  ${GREEN}help${NC}                Show this help message"
     echo -e "\nExamples:"
-    echo -e "  ./coderag.sh search \"user authentication flow\""
-    echo -e "  ./coderag.sh details \"websocket architecture\""
-    echo -e "  ./coderag.sh ask \"How does the contest system work?\""
-    echo -e "  ./coderag.sh index"
+    echo -e "  ./didi.sh get \"user auth\"      (Find code matches)"
+    echo -e "  ./didi.sh see \"websocket\"      (Same as get)"
+    echo -e "  ./didi.sh ask \"How does it work?\" (Ask for explanation)"
 }
 
 # Index the repository
 function index_repo() {
     print_header
-    echo -e "${YELLOW}Building code index...${NC}"
+    echo -e "${YELLOW}Building Didi's knowledge base...${NC}"
     echo -e "${YELLOW}This may take a few minutes depending on the size of the repository.${NC}\n"
     
     python scripts/index_code.py
     
-    echo -e "\n${GREEN}Index built successfully!${NC}"
-    echo -e "You can now use 'search' or 'ask' commands."
+    echo -e "\n${GREEN}Knowledge base built successfully!${NC}"
+    echo -e "You can now use 'get' or 'ask' commands."
 }
 
 # Search the repository
 function search_repo() {
     if [ $# -eq 0 ]; then
         echo -e "${RED}Error: Search query is required${NC}"
-        echo -e "Usage: ./coderag.sh search \"your search query\""
+        echo -e "Usage: ./didi.sh get \"your search query\""
         exit 1
     fi
     
     print_header
-    echo -e "${YELLOW}Searching code for: ${NC}$*\n"
+    echo -e "${YELLOW}Didi is finding code for: ${NC}$*\n"
     
     python scripts/search_code.py "$@"
 }
@@ -79,12 +81,12 @@ function search_repo() {
 function details_repo() {
     if [ $# -eq 0 ]; then
         echo -e "${RED}Error: Search query is required${NC}"
-        echo -e "Usage: ./coderag.sh details \"your search query\""
+        echo -e "Usage: ./didi.sh details \"your search query\""
         exit 1
     fi
     
     print_header
-    echo -e "${YELLOW}Getting detailed code for: ${NC}$*\n"
+    echo -e "${YELLOW}Didi is finding detailed code for: ${NC}$*\n"
     
     python scripts/simple_search.py "$@"
 }
@@ -93,13 +95,13 @@ function details_repo() {
 function ask_question() {
     if [ $# -eq 0 ]; then
         echo -e "${RED}Error: Question is required${NC}"
-        echo -e "Usage: ./coderag.sh ask \"your question about the code\""
+        echo -e "Usage: ./didi.sh ask \"your question about the code\""
         exit 1
     fi
     
     print_header
-    echo -e "${YELLOW}Analyzing codebase to answer: ${NC}$*\n"
-    echo -e "${YELLOW}This may take a moment as it needs to load the model...${NC}\n"
+    echo -e "${YELLOW}Didi is analyzing the code to answer: ${NC}$*\n"
+    echo -e "${YELLOW}This may take a moment as Didi needs to think...${NC}\n"
     
     python scripts/query_code.py "$@"
 }
@@ -114,17 +116,17 @@ function update_repo() {
     cd ..
     
     echo -e "\n${GREEN}Repository updated!${NC}"
-    echo -e "${YELLOW}Rebuilding index...${NC}\n"
+    echo -e "${YELLOW}Didi is rebuilding its knowledge base...${NC}\n"
     
     python scripts/index_code.py
     
-    echo -e "\n${GREEN}Index updated successfully!${NC}"
+    echo -e "\n${GREEN}Didi's knowledge base updated successfully!${NC}"
 }
 
-# Check status of the RAG system
+# Check status of the system
 function check_status() {
     print_header
-    echo -e "${YELLOW}Checking RAG system status...${NC}\n"
+    echo -e "${YELLOW}Checking Didi's system status...${NC}\n"
     
     # Check repo
     if [ -d "$CODE_RAG_REPO_PATH" ]; then
@@ -137,11 +139,11 @@ function check_status() {
     
     # Check index
     if [ -d "$CODE_RAG_DB_PATH" ]; then
-        echo -e "Vector index: ${GREEN}Found${NC}"
+        echo -e "Knowledge base: ${GREEN}Found${NC}"
         DB_SIZE=$(du -sh "$CODE_RAG_DB_PATH" | cut -f1)
-        echo -e "Index size: ${GREEN}$DB_SIZE${NC}"
+        echo -e "Knowledge size: ${GREEN}$DB_SIZE${NC}"
     else
-        echo -e "Vector index: ${RED}Not built${NC}"
+        echo -e "Knowledge base: ${RED}Not built${NC}"
     fi
     
     # Check Python environment
@@ -161,15 +163,15 @@ case "$1" in
     index)
         index_repo
         ;;
-    search)
+    get|see|g|search|s)
         shift
         search_repo "$@"
         ;;
-    details)
+    details|d)
         shift
         details_repo "$@"
         ;;
-    ask)
+    ask|a)
         shift
         ask_question "$@"
         ;;

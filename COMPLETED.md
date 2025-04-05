@@ -1,11 +1,11 @@
-# CodeRAG System: Successfully Implemented
+# Didi: Successfully Implemented DegenDuel's AI Assistant
 
 ## What's been accomplished:
 
-1. **Created a complete RAG (Retrieval-Augmented Generation) system** for the DegenDuel codebase that allows:
+1. **Created a complete AI assistant** for the DegenDuel codebase that allows:
    - ✅ Vector-based semantic search for code
    - ✅ Detailed code exploration
-   - ✅ (Partial) LLM-powered code analysis
+   - ✅ (Partial) AI-powered code analysis
 
 2. **Implemented key components**:
    - ✅ Document loading with appropriate filters
@@ -25,33 +25,33 @@
 
 ## Current capabilities:
 
-The system now provides three main ways to interact with your codebase:
+Didi now provides three main ways to interact with the DegenDuel codebase:
 
-1. **Quick Search** (`./coderag.sh search "query"`)
+1. **Quick Search** (`./didi.sh search "query"`)
    - Fast semantic search that shows summarized results
    - Perfect for quickly locating relevant code areas
 
-2. **Detailed View** (`./coderag.sh details "query"`)
+2. **Detailed View** (`./didi.sh details "query"`)
    - Comprehensive search that shows complete file contents
    - Ideal for deep dives into specific functionality
 
-3. **System Status** (`./coderag.sh status`)
-   - Shows system status, repository stats, and installed packages
+3. **System Status** (`./didi.sh status`)
+   - Shows Didi's system status, repository stats, and installed packages
 
 ## Deployment Flexibility
 
-The system can now be easily deployed in different environments:
+Didi can be easily deployed in different environments:
 
 - **Environment Variables**: All paths can be configured through environment variables
-  - `CODE_RAG_PATH`: Base directory for the system
-  - `CODE_RAG_REPO_PATH`: Path to the repository
-  - `CODE_RAG_DB_PATH`: Path to the ChromaDB database
+  - `CODE_RAG_PATH`: Base directory for Didi
+  - `CODE_RAG_REPO_PATH`: Path to the DegenDuel repository
+  - `CODE_RAG_DB_PATH`: Path to Didi's knowledge base
   - `CODE_RAG_COLLECTION_NAME`: Name of the ChromaDB collection
   - `CODE_RAG_MODEL_PATH`: Path to the LLM model
   - `CODE_RAG_EMBED_MODEL`: Path to the embedding model
 
 - **Centralized Configuration**: All settings are in a single config.py file
-  - Easy to modify and extend the system
+  - Easy to modify and extend Didi's capabilities
   - Clear documentation of all settings
 
 ## Notes on LLM Integration:
@@ -62,7 +62,7 @@ There are compatibility issues with some of the LLM integration. This is because
 2. The bitsandbytes library has compatibility issues with the current transformers version
 3. Some parameter conflicts in HuggingFaceLLM initialization
 
-To get the full LLM-powered analysis working, the next steps would be:
+To get Didi's full AI-powered analysis working, the next steps would be:
 
 ```bash
 # This would fix the LLM compatibility issues
@@ -71,33 +71,33 @@ pip install --force-reinstall transformers==4.36.0 bitsandbytes==0.41.0
 
 Or alternatively, implement a solution using llama.cpp directly to avoid dependency issues.
 
-## How to use this system:
+## How to use Didi:
 
-The system is ready to use for semantic search and detailed code exploration:
+Didi is ready to use for semantic search and detailed code exploration:
 
 ```bash
-# Check system status
-./coderag.sh status
+# Check Didi's status
+./didi.sh status
 
 # Search for code related to the WebSocket system
-./coderag.sh search "WebSocket authentication"
+./didi.sh search "WebSocket authentication"
 
 # Get detailed view of WebSocket-related code
-./coderag.sh details "WebSocket system architecture" -n 3
+./didi.sh details "WebSocket system architecture" -n 3
 
-# If you make changes to the repo, update the index
-./coderag.sh update
+# If you make changes to the repo, update Didi's knowledge
+./didi.sh update
 ```
 
-This system leverages your GH200's powerful compute capabilities to provide a superior code navigation experience compared to traditional methods.
+Didi leverages your GH200's powerful compute capabilities to provide a superior code navigation experience compared to traditional methods.
 
 ## System Structure
 
 ```
-code_rag/
+didi/
 │
 ├── config.py                 # Centralized configuration
-├── coderag.sh                # Main interface script 
+├── didi.sh                   # Main interface script 
 ├── README.md                 # Documentation
 ├── COMPLETED.md              # Implementation summary
 │
@@ -113,4 +113,4 @@ code_rag/
 
 ## Conclusion
 
-You now have a comprehensive, RAG-based code search system optimized for your LambdaLabs instance. It demonstrates the effectiveness of embedding-based search for understanding large codebases like DegenDuel, and is built with flexibility and portability in mind. 
+You now have Didi, a comprehensive AI assistant optimized for your LambdaLabs instance. Didi demonstrates the effectiveness of embedding-based search for understanding the DegenDuel codebase, and is built with flexibility and portability in mind. 

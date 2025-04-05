@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Semantic Code Search Tool for DegenDuel
-Allows fast semantic searching without requiring the full LLM pipeline.
+Didi's Quick Search: DegenDuel Codebase Search Tool
+Provides fast semantic search of the DegenDuel codebase.
 """
 
 import os
@@ -29,10 +29,10 @@ logger = logging.getLogger(__name__)
 NUM_RESULTS = 10  # Default number of results to show
 
 def load_index():
-    """Load the existing index from ChromaDB."""
+    """Load Didi's knowledge base."""
     # Check if database exists
     if not DB_DIR.exists():
-        logger.error(f"Database directory {DB_DIR} does not exist! Run the indexing script first.")
+        logger.error(f"Knowledge base directory {DB_DIR} does not exist! Run './didi.sh index' first.")
         sys.exit(1)
     
     # Initialize ChromaDB
@@ -41,7 +41,7 @@ def load_index():
     try:
         collection = client.get_collection(name=COLLECTION_NAME)
     except ValueError:
-        logger.error(f"Collection '{COLLECTION_NAME}' not found! Run the indexing script first.")
+        logger.error(f"Collection '{COLLECTION_NAME}' not found! Run './didi.sh index' first.")
         sys.exit(1)
     
     # Set up embedding model
@@ -57,16 +57,16 @@ def load_index():
     return VectorStoreIndex.from_vector_store(vector_store)
 
 def semantic_search(index, query: str, num_results: int = NUM_RESULTS):
-    """Perform semantic search on the codebase."""
+    """Didi's semantic search on the DegenDuel codebase."""
     retriever = index.as_retriever(similarity_top_k=num_results)
     nodes = retriever.retrieve(query)
     
     if not nodes:
-        print("No relevant results found.")
+        print("Didi couldn't find any relevant results. 😕")
         return
     
     # Format and print results
-    print(f"\nTop {len(nodes)} results for: '{query}'\n")
+    print(f"\nDidi found the top {len(nodes)} results for: '{query}'\n")
     print("=" * 50)
     
     for i, node in enumerate(nodes):
@@ -89,7 +89,7 @@ def main():
     """Main execution function."""
     # Parse command line arguments
     import argparse
-    parser = argparse.ArgumentParser(description='Semantically search code repository')
+    parser = argparse.ArgumentParser(description='Didi semantic search for DegenDuel codebase')
     parser.add_argument('query', type=str, nargs='+', help='The search query')
     parser.add_argument('-n', '--num-results', type=int, default=NUM_RESULTS, 
                         help=f'Number of results to return (default: {NUM_RESULTS})')
@@ -99,7 +99,7 @@ def main():
     query = " ".join(args.query)
     
     # Load the index
-    logger.info("Loading index...")
+    logger.info("Loading Didi's knowledge base...")
     index = load_index()
     
     # Perform search

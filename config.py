@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-CodeRAG System Configuration
+Didi Configuration
 
-This module provides centralized configuration for the CodeRAG system,
+This module provides centralized configuration for Didi, DegenDuel's AI Assistant,
 including paths and settings that might need to be changed when deploying
 in different environments.
 """
@@ -13,16 +13,16 @@ from pathlib import Path
 # Base directory - can be overridden with CODE_RAG_PATH environment variable
 BASE_DIR = Path(os.environ.get("CODE_RAG_PATH", os.path.dirname(os.path.abspath(__file__))))
 
-# Repository path - where the code repository is located
+# Repository path - where the DegenDuel repository is located
 REPO_DIR = Path(os.environ.get("CODE_RAG_REPO_PATH", BASE_DIR / "repo"))
 
-# Database path - where the ChromaDB files are stored
+# Database path - where Didi's knowledge base is stored
 DB_DIR = Path(os.environ.get("CODE_RAG_DB_PATH", BASE_DIR / "chroma_db"))
 
 # Collection name in ChromaDB
 COLLECTION_NAME = os.environ.get("CODE_RAG_COLLECTION_NAME", "degenduel_code")
 
-# Default model path for the LLM
+# Default model path for Didi's brain
 DEFAULT_MODEL_PATH = os.environ.get("CODE_RAG_MODEL_PATH", "codellama/CodeLlama-7b-instruct-hf")
 
 # Default embedding model

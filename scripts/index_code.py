@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Code Repository Indexing Script for DegenDuel
-Builds a searchable vector store index from the codebase.
+DegenDuel Codebase Indexing Script for Didi
+Builds Didi's knowledge base from the DegenDuel codebase.
 """
 
 import os
@@ -29,7 +29,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def load_documents(repo_path: Path):
-    """Load documents from the repository."""
+    """Load documents from the DegenDuel repository."""
     logger.info(f"Loading documents from {repo_path}")
     
     # Create exclude patterns for directories to ignore
@@ -58,8 +58,8 @@ def load_documents(repo_path: Path):
     return documents
 
 def build_index(documents, db_path: Path, collection_name: str = "degenduel_code"):
-    """Build vector store index from documents."""
-    logger.info("Building index...")
+    """Build Didi's knowledge base from documents."""
+    logger.info("Building Didi's knowledge base...")
     start_time = time.time()
     
     # Initialize ChromaDB client
@@ -97,20 +97,20 @@ def build_index(documents, db_path: Path, collection_name: str = "degenduel_code
     )
     
     end_time = time.time()
-    logger.info(f"Index built in {end_time - start_time:.2f} seconds")
+    logger.info(f"Knowledge base built in {end_time - start_time:.2f} seconds")
     
     return index
 
 def main():
     """Main execution function."""
-    logger.info("Starting code indexing process...")
+    logger.info("Starting to build Didi's knowledge base...")
     
     # Create database directory if it doesn't exist
     os.makedirs(DB_DIR, exist_ok=True)
     
     # Verify repo exists
     if not REPO_DIR.exists():
-        logger.error(f"Repository path {REPO_DIR} does not exist!")
+        logger.error(f"DegenDuel repository path {REPO_DIR} does not exist!")
         return
     
     # Load documents
@@ -119,7 +119,7 @@ def main():
     # Build index
     build_index(documents, DB_DIR)
     
-    logger.info("Indexing complete! The index is stored in the chroma_db directory.")
+    logger.info("Didi's knowledge base is now complete! It's stored in the chroma_db directory.")
     logger.info(f"Total documents indexed: {len(documents)}")
 
 if __name__ == "__main__":
