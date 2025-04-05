@@ -1,0 +1,39 @@
+# Python virtual environment
+venv/
+env/
+.venv/
+.env/
+
+# Generated data
+chroma_db/
+*.sqlite3
+
+# Downloaded models
+models/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+logs/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/ 
