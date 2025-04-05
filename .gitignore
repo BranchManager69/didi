@@ -16,9 +16,18 @@ didi.sh.bak
 # Sensitive data
 private/
 .env
+.env.*
 .secret
 secrets/
 credentials/
+keypairs/
+**/keypairs/
+*.pem
+*.key
+*.keystore
+*.p12
+wallet.json
+*-keypair.json
 
 # Downloaded models
 models/
