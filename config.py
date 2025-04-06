@@ -26,6 +26,10 @@ COLLECTION_NAME = os.environ.get("CODE_RAG_COLLECTION_NAME", "degenduel_code")
 # Model profile selection - determines which configuration to use
 MODEL_PROFILE = os.environ.get("DIDI_MODEL_PROFILE", "default")
 
+# For GH200, we SHOULD use the largest models by default - that's what it's designed for!
+if not os.environ.get("DIDI_MODEL_PROFILE"):
+    MODEL_PROFILE = "ultra"  # Use the ultra-optimized 70B model to fully utilize GH200's 480GB VRAM
+
 # Path to model profiles directory
 PROFILES_DIR = BASE_DIR / "model_profiles"
 os.makedirs(PROFILES_DIR, exist_ok=True)

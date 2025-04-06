@@ -249,9 +249,9 @@ def ask_question():
             
             # Try to select the best model profile based on available hardware
             try:
-                # If 'ultra' is available and we're on a GH200, prefer it
+                # We're on a GH200, so we SHOULD use the largest models
                 import os
-                profile = os.environ.get("DIDI_MODEL_PROFILE", "default")
+                profile = os.environ.get("DIDI_MODEL_PROFILE", "ultra")  # Default to ultra for GH200
                 
                 if os.path.exists(os.path.join(PROFILES_DIR, "ultra.json")):
                     import torch
@@ -263,12 +263,11 @@ def ask_question():
                         
                         logger.info(f"Detected GPU: {gpu_name} with {vram_gb:.1f}GB VRAM")
                         
-                        # Select profile based on available VRAM
-                        if vram_gb > 400:  # GH200 has 480GB
-                            profile = "ultra"
-                            os.environ["DIDI_MODEL_PROFILE"] = "ultra"
-                            logger.info("Detected GH200 GPU, using ultra profile with Llama-3-70B")
-                        elif vram_gb > 60:  # A100 80GB or similar
+                        # We are definitely on a GH200, so use ultra regardless
+                        profile = "ultra"
+                        os.environ["DIDI_MODEL_PROFILE"] = "ultra"
+                        logger.info("On GH200 GPU, using ultra profile with Llama-3-70B for maximum performance")
+                        if vram_gb > 60:  # A100 80GB or similar
                             profile = "gh200"
                             os.environ["DIDI_MODEL_PROFILE"] = "gh200"
                             logger.info("Detected high-end GPU, using Llama-3-70B profile")
@@ -542,6 +541,9 @@ def api_reference():
     except Exception as e:
         logger.error(f"Error serving API reference: {e}")
         return "API Reference not found", 404
+
+# Import redirect
+from flask import redirect
 
 # Add a custom 404 error handler
 @app.errorhandler(404)

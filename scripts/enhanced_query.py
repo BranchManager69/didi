@@ -171,7 +171,7 @@ def setup_llm():
         }
         
         # Create LLM instance with system prompt focused on code understanding
-        # Note: We don't need to pass cache_dir - HF_HOME env var handles this
+        # Note: We don't use cache_dir - HF_HOME env var handles this
         llm = HuggingFaceLLM(
             model_name=DEFAULT_MODEL_PATH,
             tokenizer_name=DEFAULT_MODEL_PATH,
