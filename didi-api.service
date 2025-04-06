@@ -1,0 +1,22 @@
+[Unit]
+Description=Didi AI Assistant API Server
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/degenduel-gpu/didi
+ExecStart=/home/ubuntu/degenduel-gpu/didi/run_api.sh
+Restart=always
+RestartSec=5
+Environment=HF_HOME=/home/ubuntu/degenduel-gpu/models
+Environment=TORCH_HOME=/home/ubuntu/degenduel-gpu/models
+Environment=CODE_RAG_PATH=/home/ubuntu/degenduel-gpu/didi
+Environment=CODE_RAG_REPOS_PATH=/home/ubuntu/degenduel-gpu/repos
+Environment=CODE_RAG_DB_PATH=/home/ubuntu/degenduel-gpu/data/chroma_db
+Environment=CODE_RAG_CONFIG_PATH=/home/ubuntu/degenduel-gpu/config/repos_config.json
+Environment=DIDI_MODEL_PROFILE=ultra
+
+[Install]
+WantedBy=multi-user.target
