@@ -89,6 +89,61 @@ DEFAULT_PROFILES = {
         "context_window": 16384,
         "max_new_tokens": 2048,
         "temperature": 0.1
+    },
+    "openchat": {
+        "name": "OpenChat 3.5 (Fast & Accurate)",
+        "llm_model": "openchat/openchat-3.5-0106",
+        "embed_model": "BAAI/bge-large-en-v1.5",
+        "collection_name": "degenduel_code_openchat",
+        "chunk_size": 4096,
+        "chunk_overlap": 512,
+        "context_window": 8192,
+        "max_new_tokens": 2048,
+        "temperature": 0.1
+    },
+    "llama3": {
+        "name": "Llama-3 (8B Balanced)",
+        "llm_model": "meta-llama/Meta-Llama-3-8B-Instruct",
+        "embed_model": "intfloat/e5-large-v2",
+        "collection_name": "degenduel_code_llama3",
+        "chunk_size": 4096,
+        "chunk_overlap": 512,
+        "context_window": 8192,
+        "max_new_tokens": 2048,
+        "temperature": 0.1
+    },
+    "mistral": {
+        "name": "Mistral (7B Fast)",
+        "llm_model": "mistralai/Mistral-7B-Instruct-v0.2",
+        "embed_model": "BAAI/bge-base-en-v1.5",
+        "collection_name": "degenduel_code_mistral",
+        "chunk_size": 4096,
+        "chunk_overlap": 512,
+        "context_window": 8192,
+        "max_new_tokens": 2048,
+        "temperature": 0.1
+    },
+    "phi3": {
+        "name": "Phi-3 (Fast & Small)",
+        "llm_model": "microsoft/Phi-3-mini-4k-instruct",
+        "embed_model": "sentence-transformers/all-MiniLM-L6-v2",
+        "collection_name": "degenduel_code_phi3",
+        "chunk_size": 2048,
+        "chunk_overlap": 256,
+        "context_window": 4096,
+        "max_new_tokens": 1024,
+        "temperature": 0.1
+    },
+    "ultra": {
+        "name": "UltraRAG (GH200 Optimized)",
+        "llm_model": "meta-llama/Meta-Llama-3-70B-Instruct",
+        "embed_model": "intfloat/e5-large-v2",
+        "collection_name": "degenduel_code_ultra",
+        "chunk_size": 32768,
+        "chunk_overlap": 4096,
+        "context_window": 65536,
+        "max_new_tokens": 8192,
+        "temperature": 0.1
     }
 }
 

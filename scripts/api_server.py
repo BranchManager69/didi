@@ -244,8 +244,65 @@ def ask_question():
         
         # Initialize LLM and query engine if needed
         if index is None or llm is None or query_engine is None:
-            from config import DEFAULT_MODEL_PATH
-            logger.info(f"Initializing query engine with model: {DEFAULT_MODEL_PATH}")
+            # Import modules to work with profiles
+            from config import MODEL_PROFILE, PROFILES_DIR
+            
+            # Try to select the best model profile based on available hardware
+            try:
+                # If 'ultra' is available and we're on a GH200, prefer it
+                import os
+                profile = os.environ.get("DIDI_MODEL_PROFILE", "default")
+                
+                if os.path.exists(os.path.join(PROFILES_DIR, "ultra.json")):
+                    import torch
+                    if torch.cuda.is_available():
+                        # Get GPU info
+                        gpu_name = torch.cuda.get_device_name(0)
+                        vram_bytes = torch.cuda.get_device_properties(0).total_memory
+                        vram_gb = vram_bytes / 1e9
+                        
+                        logger.info(f"Detected GPU: {gpu_name} with {vram_gb:.1f}GB VRAM")
+                        
+                        # Select profile based on available VRAM
+                        if vram_gb > 400:  # GH200 has 480GB
+                            profile = "ultra"
+                            os.environ["DIDI_MODEL_PROFILE"] = "ultra"
+                            logger.info("Detected GH200 GPU, using ultra profile with Llama-3-70B")
+                        elif vram_gb > 60:  # A100 80GB or similar
+                            profile = "gh200"
+                            os.environ["DIDI_MODEL_PROFILE"] = "gh200"
+                            logger.info("Detected high-end GPU, using Llama-3-70B profile")
+                        elif vram_gb > 30:  # A10G, A100 40GB, etc.
+                            profile = "powerful"
+                            os.environ["DIDI_MODEL_PROFILE"] = "powerful"
+                            logger.info("Detected powerful GPU, using CodeLlama-34B profile")
+                        elif vram_gb > 15:  # Consumer GPUs like 3090, 4090
+                            profile = "llama3"
+                            os.environ["DIDI_MODEL_PROFILE"] = "llama3"
+                            logger.info("Detected good GPU, using Llama-3-8B profile")
+                        elif vram_gb > 8:   # Mid-range GPUs
+                            profile = "mistral"
+                            os.environ["DIDI_MODEL_PROFILE"] = "mistral"
+                            logger.info("Detected mid-range GPU, using Mistral-7B profile")
+                        else:               # Low VRAM GPUs
+                            profile = "phi3"
+                            os.environ["DIDI_MODEL_PROFILE"] = "phi3"
+                            logger.info("Detected limited GPU, using Phi-3-mini profile")
+                    else:
+                        # CPU only - use lightweight model
+                        profile = "phi3"
+                        os.environ["DIDI_MODEL_PROFILE"] = "phi3"
+                        logger.info("No GPU detected, using Phi-3-mini profile")
+                
+                logger.info(f"Selected profile: {profile}")
+                
+                # Re-import config to get the updated profile settings
+                from config import DEFAULT_MODEL_PATH
+                logger.info(f"Initializing query engine with model: {DEFAULT_MODEL_PATH}")
+            except Exception as e:
+                logger.warning(f"Error detecting hardware capabilities: {e}")
+                from config import DEFAULT_MODEL_PATH
+                logger.info(f"Using default model: {DEFAULT_MODEL_PATH}")
             
             # Try to use enhanced query if available
             try:
