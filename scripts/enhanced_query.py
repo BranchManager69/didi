@@ -67,6 +67,11 @@ def check_dependencies():
             "transformers"
         ]
         
+        # Check if Ollama is required
+        use_ollama = os.environ.get("DIDI_USE_OLLAMA", "").lower() == "true"
+        if use_ollama:
+            required_modules.append("ollama")
+        
         missing = []
         for module in required_modules:
             if importlib.util.find_spec(module) is None:
@@ -78,6 +83,12 @@ def check_dependencies():
                 print_colored(f"  - {module}", "red")
             print_colored("\nPlease install the missing dependencies with:", "yellow")
             print_colored(f"pip install {' '.join(missing)}", "yellow")
+            
+            if "ollama" in missing:
+                print_colored("\nFor Ollama integration:", "yellow")
+                print_colored("pip install ollama", "yellow")
+                print_colored("bash setup_ollama.sh  # To install and set up Ollama", "yellow")
+            
             print_colored("\nOr run the following command to install all dependencies:", "yellow")
             print_colored("pip install -r requirements.txt", "yellow")
             return False
@@ -90,56 +101,90 @@ def check_dependencies():
 def setup_llm():
     """Set up the language model for Didi with optimization for Lambda Labs."""
     # Import modules here to avoid import errors during dependency check
-    from llama_index.llms.huggingface import HuggingFaceLLM
     from llama_index.core import Settings
     
-    logger.info(f"Loading Didi's brain: {DEFAULT_MODEL_PATH}")
+    # Prepare system prompt for code understanding
+    system_prompt = textwrap.dedent("""
+        You are Didi, the friendly and knowledgeable AI assistant for DegenDuel.
+        You specialize in the DegenDuel codebase, which is a TypeScript and React-based web application for a crypto trading game platform.
+        
+        When answering questions:
+        - Be concise, clear, and accurate
+        - Provide technical details that would help a developer understand the implementation
+        - Reference specific code files and line numbers when explaining implementation details
+        - Relate components to each other to explain the overall architecture
+        - If you're unsure about something, be honest rather than speculating
+        - Show code snippets when they help illustrate your explanations
+        
+        Remember that your purpose is to help DegenDuel developers understand, navigate, and improve their codebase!
+    """).strip()
     
-    # Setup model kwargs for GPU optimization
-    # With GH200 (96GB GPU RAM), we can use full precision for best quality
-    # Don't include device_map here - it will be passed automatically
-    model_kwargs = {
-        # No quantization needed - we have plenty of GPU memory
-        "torch_dtype": "auto",  # Use best precision for the device
-    }
+    # Check if we should use Ollama
+    use_ollama = os.environ.get("DIDI_USE_OLLAMA", "").lower() == "true"
     
-    # Configure generation parameters
-    generate_kwargs = {
-        "max_new_tokens": MAX_NEW_TOKENS,
-        "temperature": TEMPERATURE,
-        "top_p": 0.95,
-        "top_k": 50,
-        "repetition_penalty": 1.1,
-    }
-    
-    # Create LLM instance with system prompt focused on code understanding
-    # Note: We don't need to pass cache_dir - HF_HOME env var handles this
-    llm = HuggingFaceLLM(
-        model_name=DEFAULT_MODEL_PATH,
-        tokenizer_name=DEFAULT_MODEL_PATH,
-        context_window=4096,  # Adjust based on model
-        model_kwargs=model_kwargs,
-        generate_kwargs=generate_kwargs,
-        system_prompt=textwrap.dedent("""
-            You are Didi, the friendly and knowledgeable AI assistant for DegenDuel.
-            You specialize in the DegenDuel codebase, which is a TypeScript and React-based web application for a crypto trading game platform.
+    if use_ollama:
+        # Use Ollama with Llama 4
+        try:
+            from llm_ollama import OllamaLLM
             
-            When answering questions:
-            - Be concise, clear, and accurate
-            - Provide technical details that would help a developer understand the implementation
-            - Reference specific code files and line numbers when explaining implementation details
-            - Relate components to each other to explain the overall architecture
-            - If you're unsure about something, be honest rather than speculating
-            - Show code snippets when they help illustrate your explanations
+            # Get Ollama model and URL from environment variables or use defaults
+            ollama_model = os.environ.get("OLLAMA_MODEL", "llama4")
+            ollama_url = os.environ.get("OLLAMA_URL", "http://localhost:11434")
             
-            Remember that your purpose is to help DegenDuel developers understand, navigate, and improve their codebase!
-        """).strip(),
-    )
+            logger.info(f"Loading Didi's brain using Ollama with model: {ollama_model}")
+            
+            llm = OllamaLLM(
+                model_name=ollama_model,
+                ollama_url=ollama_url,
+                temperature=TEMPERATURE,
+                max_tokens=MAX_NEW_TOKENS,
+                system_prompt=system_prompt,
+            )
+            
+            logger.info(f"Using Ollama LLM with {ollama_model} model")
+        except ImportError:
+            logger.error("Failed to import OllamaLLM. Make sure ollama is installed (pip install ollama)")
+            logger.error("Falling back to HuggingFace model")
+            use_ollama = False
     
-    # Configure global settings to use our HuggingFace LLM instead of OpenAI
+    if not use_ollama:
+        # Use HuggingFace model
+        from llama_index.llms.huggingface import HuggingFaceLLM
+        
+        logger.info(f"Loading Didi's brain: {DEFAULT_MODEL_PATH}")
+        
+        # Setup model kwargs for GPU optimization
+        # With GH200 (96GB GPU RAM), we can use full precision for best quality
+        # Don't include device_map here - it will be passed automatically
+        model_kwargs = {
+            # No quantization needed - we have plenty of GPU memory
+            "torch_dtype": "auto",  # Use best precision for the device
+        }
+        
+        # Configure generation parameters
+        generate_kwargs = {
+            "max_new_tokens": MAX_NEW_TOKENS,
+            "temperature": TEMPERATURE,
+            "top_p": 0.95,
+            "top_k": 50,
+            "repetition_penalty": 1.1,
+        }
+        
+        # Create LLM instance with system prompt focused on code understanding
+        # Note: We don't need to pass cache_dir - HF_HOME env var handles this
+        llm = HuggingFaceLLM(
+            model_name=DEFAULT_MODEL_PATH,
+            tokenizer_name=DEFAULT_MODEL_PATH,
+            context_window=4096,  # Adjust based on model
+            model_kwargs=model_kwargs,
+            generate_kwargs=generate_kwargs,
+            system_prompt=system_prompt,
+        )
+    
+    # Configure global settings to use our LLM instead of OpenAI
     # This prevents fallback to OpenAI in various llama-index components
     Settings.llm = llm
-    logger.info("Configured global Settings to use HuggingFace LLM")
+    logger.info("Configured global Settings to use LLM")
     
     return llm
 
@@ -308,9 +353,21 @@ def interactive_mode():
         print_colored("Cannot start interactive mode due to missing dependencies.", "red")
         return
     
-    print_header("DIDI INTERACTIVE MODE", "cyan")
+    # Check if we're using Ollama
+    use_ollama = os.environ.get("DIDI_USE_OLLAMA", "").lower() == "true"
+    if use_ollama:
+        ollama_model = os.environ.get("OLLAMA_MODEL", "llama4")
+        print_header(f"DIDI INTERACTIVE MODE WITH {ollama_model.upper()}", "cyan")
+    else:
+        print_header("DIDI INTERACTIVE MODE", "cyan")
+    
     print_colored("Welcome to Didi, DegenDuel's AI Assistant!", "yellow")
     print_colored("I can answer questions about the DegenDuel codebase.", "yellow")
+    
+    if use_ollama:
+        ollama_model = os.environ.get("OLLAMA_MODEL", "llama4")
+        print_colored(f"Running with Ollama and {ollama_model} model", "green")
+    
     print_colored("Type 'exit', 'quit', or 'q' to exit.", "yellow")
     print()
     
@@ -364,6 +421,9 @@ def interactive_mode():
 
 def main():
     """Main execution function."""
+    # Check if we're using Ollama
+    use_ollama = os.environ.get("DIDI_USE_OLLAMA", "").lower() == "true"
+    
     # Parse command line arguments
     if len(sys.argv) > 1:
         if sys.argv[1] in ['-i', '--interactive']:
@@ -377,6 +437,11 @@ def main():
         print_colored("  python enhanced_query.py 'your question about the DegenDuel codebase'", "yellow")
         print_colored("  python enhanced_query.py -i  # Interactive mode", "yellow")
         return
+    
+    # Display using Ollama info if applicable
+    if use_ollama:
+        ollama_model = os.environ.get("OLLAMA_MODEL", "llama4")
+        logger.info(f"Using Ollama with {ollama_model} model")
     
     logger.info(f"Question for Didi: {query}")
     

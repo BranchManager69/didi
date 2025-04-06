@@ -1,0 +1,11 @@
+{
+  "name": "Default (CodeLlama-7B)",
+  "llm_model": "codellama/CodeLlama-7b-instruct-hf",
+  "embed_model": "sentence-transformers/all-MiniLM-L6-v2",
+  "collection_name": "degenduel_code",
+  "chunk_size": 1024,
+  "chunk_overlap": 128,
+  "context_window": 4096,
+  "max_new_tokens": 1024,
+  "temperature": 0.1
+}

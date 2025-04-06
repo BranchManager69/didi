@@ -1,0 +1,11 @@
+{
+  "name": "GH200 (Llama-3-70B)",
+  "llm_model": "meta-llama/Meta-Llama-3-70B-Instruct",
+  "embed_model": "BAAI/bge-large-en-v1.5",
+  "collection_name": "degenduel_code_gh200",
+  "chunk_size": 16384,
+  "chunk_overlap": 2048,
+  "context_window": 32768,
+  "max_new_tokens": 4096,
+  "temperature": 0.1
+}

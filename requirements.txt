@@ -11,4 +11,6 @@ bitsandbytes>=0.41.0
 tree-sitter==0.24.0
 tree-sitter-languages==1.10.2
 gitpython==3.1.44
-accelerate>=0.27.0 
+accelerate>=0.27.0
+# Optional: for Ollama integration with Llama 4
+ollama>=0.1.59

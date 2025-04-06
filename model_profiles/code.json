@@ -1,0 +1,11 @@
+{
+  "name": "Code Optimized (DeepSeek-Coder)",
+  "llm_model": "deepseek-ai/deepseek-coder-33b-instruct",
+  "embed_model": "flax-sentence-embeddings/st-codesearch-distilroberta-base",
+  "collection_name": "degenduel_code_optimized",
+  "chunk_size": 8192,
+  "chunk_overlap": 1024,
+  "context_window": 16384,
+  "max_new_tokens": 2048,
+  "temperature": 0.1
+}

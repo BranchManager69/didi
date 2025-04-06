@@ -15,7 +15,15 @@ import json
 
 # Add parent directory to path to allow importing config
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from config import REPOS_DIR, DB_DIR, IGNORE_DIRS, INCLUDE_EXTS, DEFAULT_EMBED_MODEL, COLLECTION_NAME, ACTIVE_REPOS
+from config import REPO_DIR, DB_DIR, IGNORE_DIRS, INCLUDE_EXTS, DEFAULT_EMBED_MODEL, COLLECTION_NAME
+from config import CHUNK_SIZE, CHUNK_OVERLAP
+
+# Load repos configuration
+REPOS_CONFIG_PATH = os.environ.get("CODE_RAG_CONFIG_PATH", os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "repos_config.json"))
+with open(REPOS_CONFIG_PATH, 'r') as f:
+    REPOS_CONFIG = json.load(f)
+
+ACTIVE_REPOS = {k: v for k, v in REPOS_CONFIG.items() if v.get("enabled", True)}
 
 # LlamaIndex imports
 from llama_index.core import Settings, Document, VectorStoreIndex
@@ -131,10 +139,14 @@ def build_index(documents: List[Document], db_path: Path, collection_name: str =
     
     # Use token-based text splitter that's optimized for code
     Settings.node_parser = TokenTextSplitter(
-        chunk_size=1024,  # Roughly 40-50 lines of code
-        chunk_overlap=128,  # Decent overlap for context
+        chunk_size=CHUNK_SIZE,  # Use profile's chunk size
+        chunk_overlap=CHUNK_OVERLAP,  # Use profile's chunk overlap
         separator="\n",  # Split by newlines for code
     )
+    
+    # Log chunk size and overlap from profile
+    logger.info(f"Using chunk size: {CHUNK_SIZE}, chunk overlap: {CHUNK_OVERLAP}")
+    logger.info(f"Using embedding model: {DEFAULT_EMBED_MODEL}")
     
     # Create index - this does the heavy lifting
     index = VectorStoreIndex.from_documents(

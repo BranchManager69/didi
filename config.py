@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#\!/usr/bin/env python3
 """
 Didi Configuration
 
@@ -14,25 +14,110 @@ from pathlib import Path
 # Base directory - can be overridden with CODE_RAG_PATH environment variable
 BASE_DIR = Path(os.environ.get("CODE_RAG_PATH", os.path.dirname(os.path.abspath(__file__))))
 
-# Repositories directory - where all codebases are located
-# Use persistent storage for repos
-REPOS_DIR = Path(os.environ.get("CODE_RAG_REPOS_PATH", "/home/ubuntu/degenduel-gpu/repos"))
+# Repository path - where the DegenDuel repository is located
+REPO_DIR = Path(os.environ.get("CODE_RAG_REPO_PATH", BASE_DIR / "repo"))
 
 # Database path - where Didi's knowledge base is stored
-# Use persistent storage for the database
-DB_DIR = Path(os.environ.get("CODE_RAG_DB_PATH", "/home/ubuntu/degenduel-gpu/data/chroma_db"))
+DB_DIR = Path(os.environ.get("CODE_RAG_DB_PATH", BASE_DIR / "chroma_db"))
 
-# Collection name in ChromaDB
-COLLECTION_NAME = os.environ.get("CODE_RAG_COLLECTION_NAME", "multi_codebase")
+# Collection name in ChromaDB - can be customized per model profile
+COLLECTION_NAME = os.environ.get("CODE_RAG_COLLECTION_NAME", "degenduel_code")
 
-# Default model path for Didi's brain
-# Use local path for models to avoid redownloading
-MODEL_CACHE_DIR = Path(os.environ.get("HF_HOME", "/home/ubuntu/degenduel-gpu/models"))
-DEFAULT_MODEL_PATH = os.environ.get("CODE_RAG_MODEL_PATH", "codellama/CodeLlama-7b-instruct-hf")
+# Model profile selection - determines which configuration to use
+MODEL_PROFILE = os.environ.get("DIDI_MODEL_PROFILE", "default")
 
-# Embedding models - multiple models for A/B testing
-# Default embedding model can be overridden with CODE_RAG_EMBED_MODEL environment variable
-DEFAULT_EMBED_MODEL = os.environ.get("CODE_RAG_EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
+# Path to model profiles directory
+PROFILES_DIR = BASE_DIR / "model_profiles"
+os.makedirs(PROFILES_DIR, exist_ok=True)
+
+# Get profile config file path
+PROFILE_CONFIG_PATH = PROFILES_DIR / f"{MODEL_PROFILE}.json"
+
+# Default profiles if no profile exists yet
+DEFAULT_PROFILES = {
+    "default": {
+        "name": "Default (CodeLlama-7B)",
+        "llm_model": "codellama/CodeLlama-7b-instruct-hf",
+        "embed_model": "sentence-transformers/all-MiniLM-L6-v2",
+        "collection_name": "degenduel_code",
+        "chunk_size": 1024,
+        "chunk_overlap": 128,
+        "context_window": 4096,
+        "max_new_tokens": 1024,
+        "temperature": 0.1
+    },
+    "powerful": {
+        "name": "Powerful (CodeLlama-34B)",
+        "llm_model": "codellama/CodeLlama-34b-instruct-hf",
+        "embed_model": "BAAI/bge-large-en-v1.5",
+        "collection_name": "degenduel_code_large",
+        "chunk_size": 8192,
+        "chunk_overlap": 1024,
+        "context_window": 8192,
+        "max_new_tokens": 2048,
+        "temperature": 0.1
+    },
+    "balanced": {
+        "name": "Balanced (Mixtral)",
+        "llm_model": "mistralai/Mixtral-8x7B-Instruct-v0.1",
+        "embed_model": "BAAI/bge-large-en-v1.5",
+        "collection_name": "degenduel_code_balanced",
+        "chunk_size": 4096, 
+        "chunk_overlap": 512,
+        "context_window": 8192,
+        "max_new_tokens": 1536,
+        "temperature": 0.1
+    },
+    "gh200": {
+        "name": "GH200 (Llama-3-70B)",
+        "llm_model": "meta-llama/Meta-Llama-3-70B-Instruct",
+        "embed_model": "BAAI/bge-large-en-v1.5",
+        "collection_name": "degenduel_code_gh200",
+        "chunk_size": 16384,
+        "chunk_overlap": 2048,
+        "context_window": 32768,
+        "max_new_tokens": 4096,
+        "temperature": 0.1
+    },
+    "code": {
+        "name": "Code Optimized (DeepSeek-Coder)",
+        "llm_model": "deepseek-ai/deepseek-coder-33b-instruct",
+        "embed_model": "flax-sentence-embeddings/st-codesearch-distilroberta-base",
+        "collection_name": "degenduel_code_optimized",
+        "chunk_size": 8192,
+        "chunk_overlap": 1024,
+        "context_window": 16384,
+        "max_new_tokens": 2048,
+        "temperature": 0.1
+    }
+}
+
+# Create default profile configs if they don't exist
+for profile_name, profile_data in DEFAULT_PROFILES.items():
+    profile_path = PROFILES_DIR / f"{profile_name}.json"
+    if not profile_path.exists():
+        with open(profile_path, "w") as f:
+            json.dump(profile_data, f, indent=2)
+
+# Load selected profile
+if not PROFILE_CONFIG_PATH.exists():
+    print(f"Profile {MODEL_PROFILE} not found, creating default config")
+    with open(PROFILE_CONFIG_PATH, "w") as f:
+        json.dump(DEFAULT_PROFILES["default"], f, indent=2)
+
+# Load the profile
+with open(PROFILE_CONFIG_PATH, "r") as f:
+    PROFILE = json.load(f)
+
+# Extract configuration from profile
+DEFAULT_MODEL_PATH = os.environ.get("CODE_RAG_MODEL_PATH", PROFILE.get("llm_model"))
+DEFAULT_EMBED_MODEL = os.environ.get("CODE_RAG_EMBED_MODEL", PROFILE.get("embed_model"))
+COLLECTION_NAME = os.environ.get("CODE_RAG_COLLECTION_NAME", PROFILE.get("collection_name", COLLECTION_NAME))
+CHUNK_SIZE = PROFILE.get("chunk_size", 1024)
+CHUNK_OVERLAP = PROFILE.get("chunk_overlap", 128) 
+CONTEXT_WINDOW = PROFILE.get("context_window", 4096)
+MAX_NEW_TOKENS = PROFILE.get("max_new_tokens", 1024)
+TEMPERATURE = PROFILE.get("temperature", 0.1)
 
 # Available embedding models for testing
 EMBEDDING_MODELS = {
@@ -43,7 +128,17 @@ EMBEDDING_MODELS = {
     "code": "flax-sentence-embeddings/st-codesearch-distilroberta-base",
     
     # Larger, more powerful general model
-    "mpnet": "sentence-transformers/all-mpnet-base-v2"
+    "mpnet": "sentence-transformers/all-mpnet-base-v2",
+    
+    # BGE models - excellent for semantic search
+    "bge-small": "BAAI/bge-small-en-v1.5",
+    "bge-base": "BAAI/bge-base-en-v1.5",
+    "bge-large": "BAAI/bge-large-en-v1.5",
+    
+    # E5 models - good for general embeddings
+    "e5-small": "intfloat/e5-small-v2",
+    "e5-base": "intfloat/e5-base-v2",
+    "e5-large": "intfloat/e5-large-v2"
 }
 
 # A/B testing configuration
@@ -79,44 +174,43 @@ INCLUDE_EXTS = [
     ".md", 
     ".html",
     ".py",
-    ".rs",
-    ".go",
-    ".java",
-    ".rb",
-    ".php",
-    ".cs",
-    ".cpp",
-    ".c",
-    ".h",
-    ".hpp",
+    ".sol",  # Solana contracts
+    ".rs",   # Rust code
+    ".toml", # Config files
+    ".yaml", 
+    ".yml"
 ]
 
-# Repositories configuration
-# Use local repos_config.json file
-REPOS_CONFIG_FILE = Path(os.environ.get("CODE_RAG_CONFIG_PATH", os.path.join(str(BASE_DIR), "repos_config.json")))
+# Function to list available profiles
+def list_profiles():
+    profiles = {}
+    for profile_file in PROFILES_DIR.glob("*.json"):
+        try:
+            with open(profile_file, "r") as f:
+                profile_data = json.load(f)
+                profile_name = profile_file.stem
+                profiles[profile_name] = profile_data.get("name", profile_name)
+        except Exception as e:
+            print(f"Error loading profile {profile_file}: {e}")
+    return profiles
 
-# Default repositories if no config file exists
-DEFAULT_REPOS = {
-    "degenduel": {
-        "name": "DegenDuel",
-        "description": "The main DegenDuel application codebase",
-        "path": str(REPOS_DIR / "degenduel"),
-        "git_url": "",  # Leave empty if already cloned
-        "enabled": True
+# Function to create a new profile
+def create_profile(profile_name, config_data):
+    profile_path = PROFILES_DIR / f"{profile_name}.json"
+    with open(profile_path, "w") as f:
+        json.dump(config_data, f, indent=2)
+    return True
+
+# Function to get current profile data
+def get_current_profile():
+    return {
+        "profile_name": MODEL_PROFILE,
+        "llm_model": DEFAULT_MODEL_PATH,
+        "embed_model": DEFAULT_EMBED_MODEL,
+        "collection_name": COLLECTION_NAME,
+        "chunk_size": CHUNK_SIZE,
+        "chunk_overlap": CHUNK_OVERLAP,
+        "context_window": CONTEXT_WINDOW,
+        "max_new_tokens": MAX_NEW_TOKENS,
+        "temperature": TEMPERATURE
     }
-}
-
-# Load repositories configuration or create default
-def load_repos_config():
-    if REPOS_CONFIG_FILE.exists():
-        with open(REPOS_CONFIG_FILE, 'r') as f:
-            return json.load(f)
-    else:
-        # Create default config
-        with open(REPOS_CONFIG_FILE, 'w') as f:
-            json.dump(DEFAULT_REPOS, f, indent=2)
-        return DEFAULT_REPOS
-
-# Active repositories (enabled in config)
-REPOS = load_repos_config()
-ACTIVE_REPOS = {k: v for k, v in REPOS.items() if v.get('enabled', True)}
