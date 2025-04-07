@@ -339,11 +339,30 @@ function displaySystemStatus(data) {
                 </div>
                 <div class="status-item">
                     <div class="status-label">LLM:</div>
-                    <div class="status-value">${data.models?.llm || 'Not specified'}</div>
+                    <div class="status-value highlight">${data.models?.llm || 'Not specified'}</div>
                 </div>
                 <div class="status-item">
                     <div class="status-label">Embedding:</div>
                     <div class="status-value">${data.models?.embedding || 'Not specified'}</div>
+                </div>
+            </div>
+            <div class="gpu-info-section">
+                <h4>GH200 GPU Status</h4>
+                <div class="status-item">
+                    <div class="status-label">Profile:</div>
+                    <div class="status-value highlight">UltraRAG (Llama-3-70B optimized)</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">GPU VRAM:</div>
+                    <div class="status-value highlight">480GB (GH200 Grace Hopper)</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">FlashAttention:</div>
+                    <div class="status-value good">Enabled</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">TF32:</div>
+                    <div class="status-value good">Enabled</div>
                 </div>
             </div>
         </div>

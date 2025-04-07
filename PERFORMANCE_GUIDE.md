@@ -1,221 +1,191 @@
-# Didi Performance Guide
+# Didi Performance Guide for GH200
 
-This guide provides advanced optimization techniques for running Didi with maximum performance, especially when working with large codebases.
+This guide provides information on optimizing Didi for maximum performance on the Lambda Labs GH200 (Grace Hopper) GPU with 480GB VRAM.
 
-## Hardware Optimization
+## GH200 Optimization
 
-### CPU Utilization
+The GH200 (Grace Hopper) GPU provides 480GB of VRAM, which allows us to run the largest language models without quantization for maximum quality. Didi has been specially configured to take advantage of this hardware:
 
-Didi's indexing performance scales with CPU cores. The parallel indexing implementation automatically detects your system's capabilities.
+### Ultra Profile
 
-```bash
-# Run with optimal parallel settings
-./didi.sh parallel-index
+An `ultra` profile has been created specifically for the GH200, which includes:
+
+- Llama-3-70B-Instruct as the default model
+- Largest possible context window (65536 tokens)
+- Maximum new tokens for generation (8192)
+- Flash Attention 2 for faster inference
+- BFloat16 precision for optimal performance
+- Higher GPU memory utilization (95%)
+
+The profile configuration is in `model_profiles/ultra.json`:
+
+```json
+{
+  "name": "UltraRAG (GH200 Optimized)",
+  "llm_model": "meta-llama/Meta-Llama-3-70B-Instruct",
+  "embed_model": "intfloat/e5-large-v2",
+  "collection_name": "degenduel_code_ultra",
+  "chunk_size": 32768,
+  "chunk_overlap": 4096,
+  "context_window": 65536,
+  "max_new_tokens": 8192,
+  "temperature": 0.1,
+  "gpu_memory_utilization": 0.95,
+  "load_in_8bit": false,
+  "load_in_4bit": false,
+  "use_flash_attn": true
+}
 ```
 
-On your 64-core system, this will:
-- Use 32-60 worker threads for document processing
-- Process multiple repositories concurrently
-- Reserve some cores for system operations
+### Automatic Hardware Detection
+
+Didi's API server includes automatic hardware detection that will:
+
+1. Check for CUDA GPU availability
+2. Detect the GPU model and available VRAM
+3. Automatically select the appropriate profile based on hardware capabilities:
+   - For GH200 (detected by name or VRAM > 400GB): `ultra` profile
+   - For high-end GPUs (VRAM > 60GB): `gh200` profile
+   - For powerful GPUs (VRAM > 30GB): `powerful` profile
+   - For good consumer GPUs (VRAM > 15GB): `llama3` profile
+   - For mid-range GPUs (VRAM > 8GB): `mistral` profile
+   - For limited GPUs or CPU-only: `phi3` profile
+
+### Manual Profile Selection
+
+You can manually override the profile selection using the `DIDI_MODEL_PROFILE` environment variable:
+
+```bash
+DIDI_MODEL_PROFILE=ultra python scripts/api_server.py
+```
+
+Or force the GH200 profile regardless of environment variable:
+
+```bash
+DIDI_FORCE_GH200=true python scripts/api_server.py
+```
+
+## Performance Tuning
+
+### Transformer Engine
+
+On GH200, you can enable NVIDIA's Transformer Engine for additional performance:
+
+```bash
+USE_TRANSFORMER_ENGINE=1 python scripts/api_server.py
+```
+
+This enables specialized NVIDIA optimizations for transformer models.
+
+### Parallel Processing
+
+For indexing large codebases, use the parallel indexing script:
+
+```bash
+python scripts/parallel_index.py
+```
+
+This utilizes multiple CPU cores for faster document processing and embedding generation.
 
 ### Memory Management
 
-With 525GB of RAM available, you can optimize for maximum performance:
+To control GPU memory usage, adjust the `gpu_memory_utilization` parameter in your profile:
 
-```python
-# Add to config.py for larger chunk sizes
-CHUNK_SIZE = 2048       # Increased from default 1024
-CHUNK_OVERLAP = 256     # Increased from default 128
-```
+- Higher values (0.95) maximize performance but may cause OOM errors with other applications
+- Lower values (0.7) are safer but may reduce performance slightly
 
-These settings allow for:
-- Processing larger code blocks as single units
-- Better context preservation between chunks
-- More comprehensive search results
+## Benchmarking
 
-### Storage Configuration
-
-Your 4TB disk allows for enhanced caching:
-
-```python
-# Add to config.py for more aggressive caching
-ENABLE_EMBEDDING_CACHE = True
-CACHE_FOLDER = "/home/ubuntu/degenduel-gpu/cache"
-```
-
-This configuration:
-- Caches embedding results for faster reindexing
-- Stores model weights for quick loading
-- Preserves data between sessions
-
-## Model Selection
-
-### Embedding Models
-
-For your high-performance environment, consider using larger embedding models:
-
-```python
-# Update in config.py
-DEFAULT_EMBED_MODEL = "sentence-transformers/all-mpnet-base-v2"  # Larger, more powerful model
-```
-
-Alternative high-performance models:
-- `BAAI/bge-large-en-v1.5` - State-of-the-art retrieval
-- `text-embedding-3-large` if using OpenAI API
-- `intfloat/e5-large-v2` - Excellent code understanding
-
-### LLM Selection
-
-With your hardware, you can use larger models for better answers:
-
-```python
-# Update in config.py
-DEFAULT_MODEL_PATH = "codellama/CodeLlama-13b-instruct-hf"  # Larger model
-```
-
-Other options:
-- `codellama/CodeLlama-34b-instruct-hf` for highest quality
-- `mistralai/Mistral-7B-Instruct-v0.2` for balanced performance
-- `bigcode/starcoder2-15b` specialized for code
-
-## Indexing Optimizations
-
-### Filter Irrelevant Files
-
-Adjust ignored directories and file patterns to focus on relevant code:
-
-```python
-# Update in config.py
-IGNORE_DIRS = [
-    ".git", 
-    "node_modules", 
-    "dist", 
-    "dist-dev", 
-    ".next", 
-    "coverage", 
-    "out",
-    "public/assets",     # Add large asset directories
-    "tests/fixtures",    # Add test fixtures
-]
-
-# Add file size limits
-MAX_FILE_SIZE_MB = 5    # Skip files larger than 5MB
-```
-
-### Code Parsing Improvements
-
-Implement specialized code parsing:
-
-```python
-# Advanced code parsing (add to config.py)
-USE_TREE_SITTER = True  # Use tree-sitter for code parsing
-PARSE_DOCSTRINGS = True # Extract docstrings for better context
-```
-
-This enables:
-- Language-aware code chunking
-- Function/class level segmentation
-- Better preservation of code structures
-
-## Query Optimizations
-
-### Hybrid Search
-
-For most accurate results, use hybrid search combining:
-- Vector search for semantic understanding
-- BM25/keyword search for exact matches
-
-```python
-# Already implemented in enhanced_query.py
-# Parameters to tune:
-TOP_K = 15              # Number of results to retrieve initially
-RERANK_TOP_N = 10       # Number to keep after reranking
-```
-
-### Response Generation
-
-Tune response generation for deeper code understanding:
-
-```python
-# Parameters in enhanced_query.py
-MAX_NEW_TOKENS = 2048   # Increased from 1024 for more detailed answers
-TEMPERATURE = 0.1       # Keep low for deterministic answers
-```
-
-## Monitoring and Tuning
-
-### Performance Metrics
-
-Monitor key metrics to identify bottlenecks:
-- Indexing time per repository
-- Embedding generation time
-- Query latency
-- RAM usage during operation
-
-The A/B testing feature can help compare different configurations:
+You can benchmark Didi's performance on your hardware using:
 
 ```bash
-./didi.sh test "websocket implementation" "user authentication" "contest creation"
+python scripts/benchmark.py
 ```
 
-### Regular Maintenance
+This will test various operations and report timings for:
+- Model loading time
+- Embedding generation time
+- Query processing time
+- Response generation time
 
-For optimal performance:
+## Optimizing for Production
 
-1. Run updates regularly to capture new code changes:
+For production deployments on the GH200:
+
+1. Use Gunicorn with multiple workers:
    ```bash
-   ./didi.sh update
+   python scripts/api_server.py --use-gunicorn --workers 4
    ```
 
-2. Periodically clean and rebuild the index:
+2. Enable result caching to improve response times for repeated queries:
    ```bash
-   rm -rf /home/ubuntu/degenduel-gpu/data/chroma_db/*
-   ./didi.sh parallel-index
+   ENABLE_RESULT_CACHE=true python scripts/api_server.py
    ```
 
-3. Monitor disk usage on persistent storage:
+3. Use the optimized `run_api.sh` script which includes all optimizations:
    ```bash
-   du -sh /home/ubuntu/degenduel-gpu/*
+   ./run_api.sh
    ```
 
-## Docker Optimization
+## Profile Comparison
 
-When running in Docker, tune container resources:
+| Profile | Model | VRAM Required | Context Window | Good For |
+|---------|-------|---------------|----------------|----------|
+| ultra   | Llama-3-70B | 400GB+ | 65536 | GH200 GPU |
+| gh200   | Llama-3-70B | 80GB+ | 32768 | A100 80GB |
+| powerful | CodeLlama-34B | 40GB+ | 8192 | A10G, A100 40GB |
+| llama3 | Llama-3-8B | 16GB+ | 8192 | Consumer GPUs (4090) |
+| mistral | Mistral-7B | 8GB+ | 8192 | Mid-range GPUs |
+| phi3 | Phi-3-mini | 4GB+ | 4096 | Limited GPUs or CPU |
 
-```yaml
-# In docker-compose.yml
-services:
-  didi:
-    # ...
-    deploy:
-      resources:
-        limits:
-          cpus: '60'    # Reserve some CPUs for system
-          memory: 500G  # Almost all available RAM
-```
+## Additional Optimizations
 
-## LambdaLabs-Specific Optimizations
+### Advanced Embedding Models
 
-For optimal performance on LambdaLabs instances:
+For best results on the GH200, we use the `intfloat/e5-large-v2` embedding model which provides:
+- Better semantic understanding of code
+- More accurate search results
+- Improved context retention
 
-1. **Instance Persistence**: 
-   - Store all important data in `/home/ubuntu/degenduel-gpu/`
-   - Set environment variables in `.bashrc` for quick restart
+### Optimized Chunking Strategy
 
-2. **GPU Acceleration**:
-   - Enable GPU acceleration for LLM inference
-   - Set `device_map: "auto"` in model configuration (already implemented)
+The ultra profile uses:
+- Larger chunk sizes (32768 characters)
+- More overlap between chunks (4096 characters)
+- This enables better understanding of large code files and complex relationships
 
-3. **Instance Type Selection**:
-   - Use instances with local NVMe storage for fastest disk I/O
-   - Select highest CPU count for parallel processing
+### Hybrid Search Implementation
 
-By implementing these optimizations, Didi will provide:
-- Faster indexing of large codebases
-- More accurate code search results
-- More detailed and helpful answers
-- Better user experience overall
+Didi combines:
+- Vector search for semantic understanding
+- BM25/keyword search for exact matches
+- Result re-ranking to prioritize most relevant code
 
----
+### Automatic API Server Scaling
 
-For additional performance tuning, consult the full technical documentation.
+The API server automatically:
+1. Detects the GH200 hardware
+2. Configures optimal worker count
+3. Sets memory limits for maximum performance
+4. Enables FlashAttention 2 for 2-3x faster inference
+
+## Lambda Labs GH200 Environment Notes
+
+To maintain optimal performance:
+
+1. **Environment Variables**:
+   - `DIDI_MODEL_PROFILE=ultra` (set in run_api.sh)
+   - `TRANSFORMERS_CACHE=/home/ubuntu/degenduel-gpu/models` (for persistent model storage)
+
+2. **Autostart Configuration**:
+   - The systemd service is configured to start after the persistent storage mounts
+   - Memory limits are set appropriately for the GH200
+
+3. **Storage Management**:
+   - Keep the persistent storage (`/home/ubuntu/degenduel-gpu/`) under 3TB
+   - Run regular maintenance to clean old logs and cached models
+
+4. **API Usage**:
+   - The HTTP API is optimized for the GH200
+   - For best performance, use batched requests
+   - The API automatically detects and uses the ultra profile

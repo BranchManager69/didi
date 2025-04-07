@@ -249,12 +249,16 @@ def ask_question():
             
             # Try to select the best model profile based on available hardware
             try:
-                # We're on a GH200, so we SHOULD use the largest models
+                # Detect GPU hardware and select the appropriate profile
                 import os
-                profile = os.environ.get("DIDI_MODEL_PROFILE", "ultra")  # Default to ultra for GH200
+                import torch
                 
-                if os.path.exists(os.path.join(PROFILES_DIR, "ultra.json")):
-                    import torch
+                # Default to ultra profile if environment variable is set
+                profile = os.environ.get("DIDI_MODEL_PROFILE", "")
+                
+                # Hardware detection if profile not explicitly set
+                if not profile:
+                    # Check if CUDA is available
                     if torch.cuda.is_available():
                         # Get GPU info
                         gpu_name = torch.cuda.get_device_name(0)
@@ -263,11 +267,12 @@ def ask_question():
                         
                         logger.info(f"Detected GPU: {gpu_name} with {vram_gb:.1f}GB VRAM")
                         
-                        # We are definitely on a GH200, so use ultra regardless
-                        profile = "ultra"
-                        os.environ["DIDI_MODEL_PROFILE"] = "ultra"
-                        logger.info("On GH200 GPU, using ultra profile with Llama-3-70B for maximum performance")
-                        if vram_gb > 60:  # A100 80GB or similar
+                        # Check for GH200 Grace Hopper (can deduce from GPU name or extreme VRAM size)
+                        if "GH200" in gpu_name or vram_gb > 400:
+                            profile = "ultra"
+                            os.environ["DIDI_MODEL_PROFILE"] = "ultra"
+                            logger.info("Detected GH200 GPU! Using ultra profile with optimizations for 480GB VRAM")
+                        elif vram_gb > 60:  # A100 80GB or similar
                             profile = "gh200"
                             os.environ["DIDI_MODEL_PROFILE"] = "gh200"
                             logger.info("Detected high-end GPU, using Llama-3-70B profile")

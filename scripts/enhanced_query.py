@@ -154,12 +154,30 @@ def setup_llm():
         logger.info(f"Loading Didi's brain: {DEFAULT_MODEL_PATH}")
         
         # Setup model kwargs for GPU optimization
-        # With GH200 (96GB GPU RAM), we can use full precision for best quality
+        # With GH200 (480GB GPU RAM), we can use full precision for best quality
         # Don't include device_map here - it will be passed automatically
         model_kwargs = {
             # No quantization needed - we have plenty of GPU memory
             "torch_dtype": "auto",  # Use best precision for the device
+            "use_flash_attention_2": True,  # Use FlashAttention 2 for faster inference
         }
+        
+        # Load profile config to check for specific GPU optimizations
+        try:
+            from config import PROFILE, MODEL_PROFILE
+            if MODEL_PROFILE in ['ultra', 'gh200']:
+                # Apply GH200-specific optimizations if using ultra/gh200 profile
+                gpu_memory_utilization = PROFILE.get("gpu_memory_utilization", 0.95)
+                use_flash_attn = PROFILE.get("use_flash_attn", True)
+                # Add GH200 specific optimizations
+                model_kwargs.update({
+                    "gpu_memory_utilization": gpu_memory_utilization,  # Use more VRAM
+                    "use_flash_attention_2": use_flash_attn,
+                    "torch_dtype": "bfloat16" if torch.cuda.is_bf16_supported() else "auto",
+                })
+                logger.info(f"Applied GH200 optimizations from {MODEL_PROFILE} profile")
+        except Exception as e:
+            logger.warning(f"Could not load profile optimizations: {e}")
         
         # Configure generation parameters
         generate_kwargs = {

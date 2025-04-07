@@ -17,6 +17,22 @@ This will:
 - Start it immediately
 - Show the current status
 
+## Auto-Restart Monitor Setup
+
+The auto-restart monitor watches for changes to UI files and automatically restarts the API server when they change:
+
+1. Run the monitor installation script with sudo:
+
+```bash
+cd /home/ubuntu/degenduel-gpu/didi
+sudo ./install-monitor.sh
+```
+
+This will:
+- Install inotify-tools if needed
+- Install and start the monitor service
+- Configure it to restart automatically
+
 ## Manual Setup
 
 If you prefer to set up the service manually:
@@ -41,6 +57,7 @@ sudo systemctl start didi-api.service
 
 ```bash
 sudo systemctl status didi-api.service
+sudo systemctl status didi-api-monitor.service
 ```
 
 ### View Logs
@@ -51,18 +68,23 @@ sudo journalctl -u didi-api.service
 
 # View application logs
 cat /home/ubuntu/degenduel-gpu/didi/logs/didi_api.log
+
+# View auto-restart logs
+cat /home/ubuntu/degenduel-gpu/didi/logs/auto-restart.log
 ```
 
 ### Stop the Service
 
 ```bash
 sudo systemctl stop didi-api.service
+sudo systemctl stop didi-api-monitor.service
 ```
 
 ### Disable Autostart
 
 ```bash
 sudo systemctl disable didi-api.service
+sudo systemctl disable didi-api-monitor.service
 ```
 
 ## Configuration
@@ -83,6 +105,15 @@ Once the service is running, you can access:
 - Web interface: `http://localhost:8000/` (through SSH tunnel)
 - API endpoints: `http://localhost:8000/api/...` (through SSH tunnel)
 
+## File Monitoring
+
+The auto-restart monitor watches for changes in:
+- `/home/ubuntu/degenduel-gpu/didi/public` (HTML, CSS, JS files)
+- `/home/ubuntu/degenduel-gpu/didi/scripts` (Python files)
+- `/home/ubuntu/degenduel-gpu/didi/model_profiles` (JSON profiles)
+
+When any of these files change, it automatically restarts the API server.
+
 ## Troubleshooting
 
 If the service fails to start:
@@ -100,6 +131,7 @@ tail -50 /home/ubuntu/degenduel-gpu/didi/logs/didi_api.log
 3. Ensure correct permissions:
 ```bash
 sudo chmod +x /home/ubuntu/degenduel-gpu/didi/run_api.sh
+sudo chmod +x /home/ubuntu/degenduel-gpu/didi/auto-restart.sh
 sudo chown -R ubuntu:ubuntu /home/ubuntu/degenduel-gpu/didi/logs
 ```
 
@@ -107,6 +139,7 @@ sudo chown -R ubuntu:ubuntu /home/ubuntu/degenduel-gpu/didi/logs
 ```bash
 cd /home/ubuntu/degenduel-gpu/didi
 pip install flask flask-cors gunicorn
+sudo apt-get install inotify-tools
 ```
 
 ## Security Note

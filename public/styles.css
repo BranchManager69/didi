@@ -76,6 +76,34 @@ header h1 {
     letter-spacing: 0.05em;
 }
 
+.model-info {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.model-badge, .profile-badge, .gpu-badge {
+    font-size: 0.75rem;
+    padding: 0.25em 0.75em;
+    border-radius: 9999px;
+    font-weight: 500;
+}
+
+.model-badge {
+    background-color: #0ea5e9;
+    color: white;
+}
+
+.profile-badge {
+    background-color: #8b5cf6;
+    color: white;
+}
+
+.gpu-badge {
+    background-color: #f59e0b;
+    color: white;
+}
+
 main {
     flex: 1;
     padding: 2rem 0;
@@ -371,6 +399,23 @@ select {
 
 .status-value.bad {
     color: var(--error-color);
+}
+
+.status-value.highlight {
+    color: #0ea5e9;
+    font-weight: 600;
+}
+
+.gpu-info-section {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.gpu-info-section h4 {
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    color: var(--primary-color);
 }
 
 .loading-overlay {

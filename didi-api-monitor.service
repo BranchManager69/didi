@@ -1,0 +1,16 @@
+[Unit]
+Description=Didi API Auto-restart Monitor
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/degenduel-gpu/didi
+ExecStart=/home/ubuntu/degenduel-gpu/didi/auto-restart.sh
+Restart=always
+RestartSec=10
+Environment=DISPLAY=:0
+
+[Install]
+WantedBy=multi-user.target
